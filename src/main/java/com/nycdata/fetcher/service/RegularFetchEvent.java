@@ -42,15 +42,15 @@ public class RegularFetchEvent {
 
     private static final Logger logger = LoggerFactory.getLogger(RegularFetchEvent.class);
 
-    //@PostConstruct
+    @PostConstruct
     public void prepareMap(){
         idToLastUpdated = eventDao.getDatabaseMem();
         oldEvents=new HashSet<>(idToLastUpdated.keySet());
     }
 
-    //@Scheduled(fixedDelay = 300000) // 每300秒执行一次
+    @Scheduled(fixedDelay = 180000) // 每180秒执行一次
     public void performTaskAtFixedRate() {
-        logger.info("Fetching events from " + eventsUrl);
+        logger.info("[***EVENT0***] Fetching events from " + eventsUrl);
         getRawData();
         Gson gson = new Gson();
         Type eventType = new TypeToken<List<EventVo>>(){}.getType();
@@ -82,7 +82,7 @@ public class RegularFetchEvent {
             if(bothHas.contains(event.getID())){
                 if(idToLastUpdated.get(event.getID())<toUnixTimestamp(event.getLastUpdated())){
                     update++;
-                    logger.info("Event "+event.getID()+" has been updated");
+                    logger.info("[***EVENT0***] Event "+event.getID()+" has been updated");
                     idToLastUpdated.put(event.getID(),toUnixTimestamp(event.getLastUpdated()));
                     toInsert.add(constructNewEvent(event));
                 }
@@ -103,10 +103,10 @@ public class RegularFetchEvent {
             try {
                 eventDao.saveOneEvent(eventEntity);
             }catch (Exception e) {
-                logger.error("Error saving event: " + eventEntity);
+                logger.error("[***EVENT0***] Error saving event: " + eventEntity);
             }
         }
-        logger.info("[UPDATED]: "+update+"  [ADDED]: "+onlyNewHas.size()+"  [DELETED]: "+onlyOldHas.size());
+        logger.info("[***EVENT0***] [UPDATED]: "+update+"  [ADDED]: "+onlyNewHas.size()+"  [DELETED]: "+onlyOldHas.size());
 
     }
 
